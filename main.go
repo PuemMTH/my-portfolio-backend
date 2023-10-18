@@ -11,7 +11,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -45,11 +44,12 @@ func setupMiddlewares(app *fiber.App) {
 }
 
 func initializeDatabase() (*gorm.DB, error) {
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println("DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME are required")
-		log.Fatal("Error loading .env file")
-	}
+	// get env from Environtment
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	fmt.Println("DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME are required")
+	// 	log.Fatal("Error loading .env file")
+	// }
 
 	Database := types.DB{
 		Host:     os.Getenv("DB_HOST"),
