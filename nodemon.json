@@ -1,0 +1,8 @@
+{
+    "ext": "go",
+    "ignore": ["go.sum", "go.mod"],
+    "watch": ["*.go"],
+    "signal": "SIGTERM",
+    "exec": "go run .",
+    "delay": "1"
+}
