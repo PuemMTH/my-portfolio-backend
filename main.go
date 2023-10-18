@@ -68,6 +68,7 @@ func initializeDatabase() (*gorm.DB, error) {
 	)
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+
 	if err != nil {
 		return nil, err
 	}
@@ -76,9 +77,10 @@ func initializeDatabase() (*gorm.DB, error) {
 }
 
 func runServer(app *fiber.App, db *gorm.DB) {
+
 	go func() {
 		fmt.Println("Listening on http://localhost:3000")
-		if err := app.Listen(":3000"); err != nil {
+		if err := app.Listen(getPort()); err != nil {
 			log.Fatalf("Failed to start server: %v", err)
 		}
 	}()
@@ -94,4 +96,14 @@ func runServer(app *fiber.App, db *gorm.DB) {
 	}
 
 	log.Println("Server exited")
+}
+func getPort() string {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = ":3000"
+	} else {
+		port = ":" + port
+	}
+
+	return port
 }
