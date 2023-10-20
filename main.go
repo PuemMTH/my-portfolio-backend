@@ -6,12 +6,12 @@ import (
 	"os"
 	"os/signal"
 	"puem/puem/api"
-	"puem/puem/types"
+	"puem/puem/databases/connection"
+	"puem/puem/databases/models"
 	"syscall"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -20,16 +20,30 @@ func main() {
 	app := fiber.New()
 
 	// Set up the database
-	db, err := initializeDatabase()
+	db, err := connection.GetDatabase()
 	if err != nil {
 		log.Fatalf("Failed to initialize the database: %v", err)
 	}
+
+	db.AutoMigrate(
+		&models.ProfileData{},
+		&models.Projects{},
+		&models.Images{},
+		&models.Technologies{},
+		&models.Skills{},
+		&models.Github{},
+		&models.Website{},
+		&models.Experience{},
+		&models.Certificate{},
+		&models.EducationData{},
+		&models.Languages{},
+		&models.Interests{},
+	)
 
 	// Set up middleware
 	setupMiddlewares(app)
 
 	// Set up routes
-	api.SetupRoutesAPI(app)
 	api.SetupRoutesDatabase(app, db)
 
 	runServer(app, db)
@@ -37,47 +51,9 @@ func main() {
 
 func setupMiddlewares(app *fiber.App) {
 	app.Use(logger.New())
-	// app.Use(func(c *fiber.Ctx) error {
-	// 	// log.Println(c.Method(), c.Path())
-	// 	return c.Next()
-	// })
-}
-
-func initializeDatabase() (*gorm.DB, error) {
-	// get env from Environtment
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	fmt.Println("DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME are required")
-	// 	log.Fatal("Error loading .env file")
-	// }
-
-	Database := types.DB{
-		Host:     os.Getenv("DB_HOST"),
-		Port:     os.Getenv("DB_PORT"),
-		User:     os.Getenv("DB_USER"),
-		Password: os.Getenv("DB_PASSWORD"),
-		Name:     os.Getenv("DB_NAME"),
-	}
-
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		Database.User,
-		Database.Password,
-		Database.Host,
-		Database.Port,
-		Database.Name,
-	)
-
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return db, nil
 }
 
 func runServer(app *fiber.App, db *gorm.DB) {
-
 	go func() {
 		fmt.Println("Listening on http://localhost:3000")
 		if err := app.Listen(getPort()); err != nil {
